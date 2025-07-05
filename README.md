@@ -43,8 +43,8 @@
 ```
 Pithub/
 ├── frontend/        # React + Vite-based frontend
-├── backend/         # Express + Prisma backend
-└── cli/             # Custom CLI tool (coming soon)
+├── backend/         # Express + mongoose backend
+└── cli/             # commander.js
 ```
 
 ---
