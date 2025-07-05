@@ -18,8 +18,8 @@
 ## 🔧 Tech Stack
 
 - **Frontend**: React, Tailwind CSS, Vite
-- **Backend**: Node.js, Express, Prisma
-- **Database**: PostgreSQL
+- **Backend**: Node.js, Express, mongoose
+- **Database**: MongoDB
 - **Authentication**: JWT-based (Multi-role support)
 - **CLI**: Node.js-based custom CLI (planned)
 - **Deployment**: Render / Vercel (TBD)
