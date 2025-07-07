@@ -1,14 +1,18 @@
-const mongoose=require('mongoose')
+const mongoose = require('mongoose');
 
-const reposchema=new mongoose.Schema({
-    name:{
-        type:String,
-        required:true
-    },
-    createdAt:{
-        type:Date,
-        default:Date.now
-    }
-})
+const repoSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  commits: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Commit'
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
 
-module.exports=mongoose.model('repo',reposchema)
+module.exports = mongoose.model('Repo', repoSchema);

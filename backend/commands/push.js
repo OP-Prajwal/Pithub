@@ -1,63 +1,67 @@
-const fs=require('fs')
-const path=require('path')
+const fs = require('fs');
+const path = require('path');
+const zlib = require('zlib');
+const axios = require('axios');
 
-const axios=require('axios')
+module.exports = async function push() {
+  const gitDir = path.join(process.cwd(), '.mygit');
+  const config = JSON.parse(fs.readFileSync(path.join(gitDir, 'config.json'), 'utf-8'));
+  const head = fs.readFileSync(path.join(gitDir, 'HEAD'), 'utf-8').trim();
 
-module.exports=async function push(){
-       const currentdir=process.cwd()
-        const gitpath=path.join(currentdir,".mypit")
-        const configpath=path.join(gitpath,"config.json")
-        const filesJson=path.join(currentdir,"files.json")
+  if (!config.remote) {
+    console.log('❌ No remote set. Run `mygit remote <repoId>` first.');
+    return;
+  }
 
-        if(!fs.existsSync(gitpath)){
-            console.log("not a git repo ")
-            return
-        }
-    
-        if(!fs.existsSync(configpath)){
-            console.log("config file does not exists")
-           return
-        }
+  const objects = [];
+  const walkObjects = (hash, seen = new Set()) => {
+    if (seen.has(hash)) return;
+    seen.add(hash);
 
-         if(!fs.existsSync(filesJson)){
-            console.log("no files staged ")
-           return
-        }
+    const dir = path.join(gitDir, 'objects', hash.slice(0, 2));
+    const file = path.join(dir, hash.slice(2));
+    if (!fs.existsSync(file)) return;
 
-        const files=[]
-        const configdata=JSON.parse(fs.readFileSync(configpath,"utf-8"))
-        const repoid=configdata.remote
-    
-        const stagedfiles=JSON.parse(fs.readFileSync(filesJson,"utf-8"))
+    const buffer = zlib.inflateSync(fs.readFileSync(file));
+    const headerEnd = buffer.indexOf(0);
+    const header = buffer.slice(0, headerEnd).toString();
+    const type = header.split(' ')[0];
+    const content = buffer.slice(headerEnd + 1).toString();
 
-        for (const file of stagedfiles){
+    objects.push({ hash, type, content });
 
-            const filepath=path.join(currentdir,file)
-            if(fs.existsSync(filepath)){
-                const content=fs.readFileSync(filepath,"utf-8")
-                files.push({file,content})
+    // Recursively fetch blobs inside tree
+    if (type === 'tree') {
+      const lines = content.trim().split('\n');
+      for (const line of lines) {
+        const [, childHash] = line.split(' ');
+        walkObjects(childHash, seen);
+      }
+    }
 
-            }else{
-                console.log(`${file} does not exist`)
-            }
-        }
-       
+    if (type === 'commit') {
+      const lines = content.split('\n');
+      const treeLine = lines.find(l => l.startsWith('tree '));
+      const parentLine = lines.find(l => l.startsWith('parent '));
+      if (treeLine) walkObjects(treeLine.split(' ')[1], seen);
+      if (parentLine) walkObjects(parentLine.split(' ')[1], seen);
+    }
+  };
 
-    
-        const res=await axios.post(`${repoid}/push`,{
-            message:"first push of all files ",files
-        })
+  walkObjects(head);
 
-        console.log(res.data)
-        if(res){
-            
-            console.log("files are pushed succesfully ")
-            fs.writeFileSync(filesJson,JSON.stringify([],null,2))
-        }else{
-            console.log("some error in pushing to mongo")
-        }
-    
-   
+  // Send all objects and metadata to backend
+  try {
+    await axios.post(`http://localhost:3000/git/push/${config.remote}`, {
+      commitHash: head,
+      objects,
+      message: objects.find(o => o.type === 'commit')?.content.split('message ')[1].trim(),
+      timestamp: new Date().toISOString(),
+      parent: null // optional
+    });
 
-
-}
+    console.log('🚀 Pushed to remote successfully!');
+  } catch (err) {
+    console.error('❌ Push failed:', err.message);
+  }
+};

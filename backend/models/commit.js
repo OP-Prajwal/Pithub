@@ -1,22 +1,27 @@
-const mongoose=require('mongoose')
+const mongoose = require('mongoose');
 
-const commitschema=new mongoose.Schema({
-    repo:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"repo"
-    },
-    message:{
-        type:String
-    },
-    timestamp:{
-        type:Date,
-        default:Date.now
-    },
-    files:[{
-        filename:String,
-        content:String
-    }]
+const commitSchema = new mongoose.Schema({
+  hash: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  tree: {
+    type: String, // hash of tree object
+    required: true
+  },
+  message: {
+    type: String,
+    required: true
+  },
+  timestamp: {
+    type: String, // ISO format
+    required: true
+  },
+  parent: {
+    type: String, // parent commit hash
+    default: null
+  }
+});
 
-})
-
-module.exports=mongoose.model('commit',commitschema)
+module.exports = mongoose.model('Commit', commitSchema);

@@ -3,7 +3,7 @@
 const {program}=require('commander')
 const addremote=require('./commands/remote')
 const init=require('./commands/init')
-const push=require('./commands/push')
+
 const add=require('./commands/add')
 program.name("mygit")
 .description("a simple git clone")
@@ -22,11 +22,24 @@ program.command("add <file>")
 .description("helps to stage files")
 .action(add)
 
+program
+  .command('commit')
+  .option('-m, --message <message>', 'Commit message')
+  .description('Create a new commit')
+  .action((opts) => {
+    commit(opts.message || 'No message');
+  });
 
 
-program.command('push')
-.description("pushes the files")
-.action(push)
+const push = require('./commands/push');
+
+program
+  .command('push')
+  .description('Push to remote repo')
+  .action(() => {
+    push();
+  });
+
 
 
 

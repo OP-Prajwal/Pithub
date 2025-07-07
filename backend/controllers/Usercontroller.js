@@ -46,4 +46,9 @@ const verify=async(req,res)=>{
 
 }
 
+const getallrepos=async (req,res)=>{
+
+  
+}
+
 module.exports={register,verify}
