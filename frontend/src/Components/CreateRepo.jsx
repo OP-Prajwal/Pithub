@@ -1,30 +1,39 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 const CreateRepo = ({ onCreate }) => {
   const [repoName, setRepoName] = useState('');
   const [description, setDescription] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [message, setMessage] = useState('');
+  const naviagte=useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     try {
       // Replace with your backend endpoint
-      const response = await axios.post('', {
-       
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setMessage('Repository created successfully!');
-        setRepoName('');
-        setDescription('');
-        setIsPrivate(false);
-        if (onCreate) onCreate(data);
-      } else {
-        setMessage(data.message || 'Failed to create repository.');
-      }
+      const response = await axios.post(
+        'http://localhost:3000/repo/init',
+        {
+          name: repoName,
+          description,
+          isprivate: isPrivate
+        },
+        {
+          headers: {
+            'Authorization': `bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      setMessage('Repository created successfully!');
+      setRepoName('');
+      setDescription('');
+      setIsPrivate(false);
+      if (onCreate) onCreate(response.data);
+      naviagte(`/repo/${response.data.repo.id}?new=true`)
+
     } catch (err) {
       setMessage('An error occurred. Please try again.');
     }

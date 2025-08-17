@@ -12,6 +12,12 @@ const repoSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  description:{
+    type:String
+  },
+  isprivate:{
+    type:Boolean
   }
 });
 

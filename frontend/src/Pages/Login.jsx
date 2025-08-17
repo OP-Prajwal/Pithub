@@ -1,26 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useDispatch } from 'react-redux'
+import { loginsuccess } from '../redux/userSlice';
+
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const usenaviagate=useNavigate()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     try {
       // Replace the URL below with your backend login endpoint
-      const response = await fetch('http://localhost:3000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+      const response = await axios.post('http://localhost:3000/login', {
+        Username: username,
+        password
       });
-      const data = await response.json();
-      if (response.ok) {
+      const data = response.data;
+      if (data) {
         setMessage('Login successful!');
-        usenaviagate('/home')
-        // Optionally, redirect or store token here
+        dispatch(loginsuccess({name:username, _id: data._id, token: data.token }));
+        localStorage.setItem('token',data.token)
+        navigate('/home');
       } else {
         setMessage(data.message || 'Login failed.');
       }
@@ -69,7 +74,7 @@ const Login = () => {
           <div className="mt-4 text-center text-sm text-red-600">{message}</div>
         )}
         <p className="text-sm text-center mt-4">
-          Don't have an account? <a href="/signup" className="text-blue-600 hover:underline">Sign up</a>
+          Don't have an account? <a href="/register" className="text-blue-600 hover:underline">Sign up</a>
         </p>
       </div>
     </div>

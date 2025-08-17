@@ -27,8 +27,9 @@ function saveObject(type, content, gitDir) {
 
 module.exports = function commit(message) {
   const repoDir = process.cwd();
-  const gitDir = path.join(repoDir, '.mygit');
-  const indexPath = path.join(gitDir, 'index.json');
+  const gitDir = path.join(repoDir, '.mypit');
+ const indexPath = path.join(gitDir, 'index.json'); // remove 'objects'
+
   const headPath = path.join(gitDir, 'HEAD');
 
   if (!fs.existsSync(indexPath)) {

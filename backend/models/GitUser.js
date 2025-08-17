@@ -7,7 +7,11 @@ const gitUserSchema=new mongoose.Schema({
     },
     password:{
         type:String
-    } 
+    },
+    repos:[{
+        type: mongoose.Schema.Types.ObjectId,
+            ref: 'Repo'
+    }]
 },{
     timestamps:true,
     toJSON:{
@@ -26,8 +30,8 @@ gitUserSchema.pre('save',async function (next){
     next()
 })
 
-gitUserSchema.methods.comparepassword=async function (enterpassword){
-    return await bcrpt.compare(this.password,enterpassword)
+gitUserSchema.methods.comparepassword = async function (enterpassword) {
+    return await bcrpt.compare(enterpassword, this.password);
 }
 
 module.exports=mongoose.model("GitUser",gitUserSchema)

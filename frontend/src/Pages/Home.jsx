@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CreateRepo from '../Components/CreateRepo';
-
+import axios from 'axios';
+import { useEffect } from 'react';
 
 const mockRepos = [
   {
@@ -32,16 +33,39 @@ const mockRepos = [
 const Home = () => {
   const [showCreate, setShowCreate] = useState(false);
   const navigate = useNavigate();
+  const [allrepos, setAllrepos] = useState([])
 
   const handleNewRepo = () => setShowCreate(true);
   const handleClose = () => setShowCreate(false);
   const handleCreated = () => {
     setShowCreate(false);
     // Optionally refresh repo list here
+    
   };
+  useEffect(() => {
+    const getallrepos=async ()=>{
+      const response=await axios.get('http://localhost:3000/repo/all',{
+        headers:{
+           'Authorization': `bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          
+        }
+      })  
+      if(response){
+        setAllrepos(response.data.repos)
+        console.log(response.data)
+      }
+  
+    }
+    getallrepos()
+    
+  }, [])
+  
 
-  const handleViewRepo = (repoName) => {
-    navigate(`/repo/${encodeURIComponent(repoName)}`);
+
+
+  const handleViewRepo = (repoid) => {
+    navigate(`/repo/${repoid}`);
   };
 
   return (
@@ -100,7 +124,7 @@ const Home = () => {
             <span>📦</span> Your repositories
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {mockRepos.map((repo, idx) => (
+            {allrepos.map((repo, idx) => (
               <div key={idx} className="bg-white/90 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow border border-blue-100 p-6 flex flex-col justify-between group relative overflow-hidden">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
@@ -116,7 +140,7 @@ const Home = () => {
                 <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold shadow hover:bg-blue-200"
-                    onClick={() => handleViewRepo(repo.name)}
+                    onClick={() => handleViewRepo(repo._id)}
                   >
                     View
                   </button>

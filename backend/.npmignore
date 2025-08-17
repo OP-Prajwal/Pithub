@@ -1,0 +1,12 @@
+# Ignore backend/server-only files
+.env
+index.js
+controllers/
+models/
+routes/
+middleware/
+frontend/
+client/
+node_modules/
+*.log
+README.md

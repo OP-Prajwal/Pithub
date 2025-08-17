@@ -3,7 +3,7 @@
 const {program}=require('commander')
 const addremote=require('./commands/remote')
 const init=require('./commands/init')
-
+const commit=require('./commands/commit')
 const add=require('./commands/add')
 program.name("mygit")
 .description("a simple git clone")

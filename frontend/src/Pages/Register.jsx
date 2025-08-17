@@ -1,34 +1,39 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { loginsuccess } from '../redux/userSlice';
 const Register = () => {
   const navigate=useNavigate()
+  const dispatch=useDispatch()
 
     
-      const [Username, setUsername] = useState('');
-      const [password, setPassword] = useState('');
-      const [message, setMessage] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
     
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-        setMessage('');
-        try {
-         const reposnse=await axios.post('http://localhost:3000/signup',{
-            Username,password
-         })
-      
-          if (reposnse) {
-            setMessage('Registration (login) successful!');
-            setUsername('');
-            setPassword('');
-            navigate('/home')
-          } else {
-            setMessage(data.message || 'Registration (login) failed.');
-          }
-        } catch (err) {
-          setMessage('An error occurred. Please try again.');
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    try {
+      const response = await axios.post('http://localhost:3000/signup', {
+        Username: username,
+        password
+      });
+      const data = response.data;
+      if (data && data._id && data.token) {
+        setMessage('Registration successful!');
+        setUsername('');
+        setPassword('');
+        dispatch(loginsuccess({name:username, _id: data._id, token: data.token }));
+        navigate('/home');
+      } else {
+        setMessage(data.message || 'Registration failed.');
       }
+    } catch (err) {
+      setMessage('An error occurred. Please try again.');
+    }
+  };
     
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
@@ -47,7 +52,7 @@ const Register = () => {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Choose a username"
-                value={Username}
+                value={username}
                 onChange={e => setUsername(e.target.value)}
               />
             </div>
@@ -75,7 +80,7 @@ const Register = () => {
             By clicking "Create account", you agree to our <a href="#" className="text-blue-600 hover:underline">Terms</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>.
           </p>
           <p className="text-sm text-center mt-4">
-            Already have an account? <a href="/login" className="text-blue-600 hover:underline">Sign in</a>
+            Already have an account? <a href="/" className="text-blue-600 hover:underline">Sign in</a>
           </p>
         </div>
       </div>

@@ -48,7 +48,7 @@ function walkFiles(baseDir, filePath) {
 // ADD command
 module.exports = function add(inputPath) {
   const currentDir = process.cwd();
-  const gitDir = path.join(currentDir, '.mygit');
+  const gitDir = path.join(currentDir, '.mypit');
 
   if (!fs.existsSync(gitDir)) {
     console.log('❌ No repo found. Run `mygit init` first.');
@@ -64,7 +64,7 @@ module.exports = function add(inputPath) {
   const allFiles = walkFiles(currentDir, inputPath);
 
   for (const file of allFiles) {
-    if (file.startsWith('.mygit')) continue; // Don't add internal files
+    if (file.startsWith('.mypit')) continue; // Don't add internal files
 
     const content = fs.readFileSync(file, 'utf-8');
     const hash = saveBlob(content, gitDir);
